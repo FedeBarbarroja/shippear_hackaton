@@ -1,0 +1,18 @@
+{
+  "name": "buendia-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "google-spreadsheet": "^4.1.4",
+    "google-auth-library": "^9.15.0"
+  }
+}
