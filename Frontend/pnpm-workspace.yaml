@@ -1,0 +1,12 @@
+allowBuilds:
+  msw: false
+  sharp: false
+
+onlyBuiltDependencies:
+  - sharp
+  - msw
+  - "@vercel/speed-insights"
+  - "@vercel/analytics"
+
+overrides:
+  hono: 4.12.25
