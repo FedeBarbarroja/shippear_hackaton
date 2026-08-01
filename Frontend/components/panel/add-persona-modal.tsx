@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { X, UserPlus, ArrowRight } from "lucide-react"
 import { usePeople } from "@/lib/people"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,8 @@ export function AddPersonaModal({
   onCreated?: (nombre: string) => void
 }) {
   const { addPersona } = usePeople()
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -31,16 +33,18 @@ export function AddPersonaModal({
     }
   }, [open, onClose])
 
-  function handleSubmit(data: PersonaFormData) {
-    addPersona({
-      nombre: data.nombre,
-      telefono: data.telefono,
-      familiar: data.familiar,
-      horario: data.horario,
-      intereses: data.intereses,
-    })
-    onCreated?.(data.nombre)
-    onClose()
+  async function handleSubmit(data: PersonaFormData) {
+    setError(null)
+    setEnviando(true)
+    try {
+      await addPersona(data)
+      onCreated?.(data.nombre)
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo dar de alta. Probá de nuevo.")
+    } finally {
+      setEnviando(false)
+    }
   }
 
   if (!open) return null
@@ -82,6 +86,7 @@ export function AddPersonaModal({
         </div>
 
         <div className="flex flex-col gap-3 border-t border-border bg-card p-6 md:px-8 md:py-5">
+          {error && <p className="text-center text-sm text-emergency sm:text-right">{error}</p>}
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button
               type="button"
@@ -92,8 +97,8 @@ export function AddPersonaModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" form="add-persona-form" size="lg" className="h-12 text-base">
-              Dar de alta y agendar
+            <Button type="submit" form="add-persona-form" size="lg" className="h-12 text-base" disabled={enviando}>
+              {enviando ? "Dando de alta…" : "Dar de alta y agendar"}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>

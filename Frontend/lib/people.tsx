@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react"
 import { HISTORIAL, type EstadoKey, type Llamada } from "@/lib/buendia"
+import { altaPersona as altaPersonaApi } from "@/lib/api"
+import type { PersonaFormData } from "@/components/persona-form"
 
 export type Persona = {
   id: string
@@ -72,7 +74,7 @@ const PERSONAS_INICIALES: Persona[] = [
 
 type PeopleContextValue = {
   personas: Persona[]
-  addPersona: (data: Omit<Persona, "id" | "llamadas">) => Persona
+  addPersona: (data: PersonaFormData) => Promise<Persona>
 }
 
 const PeopleContext = createContext<PeopleContextValue | null>(null)
@@ -80,10 +82,23 @@ const PeopleContext = createContext<PeopleContextValue | null>(null)
 export function PeopleProvider({ children }: { children: ReactNode }) {
   const [personas, setPersonas] = useState<Persona[]>(PERSONAS_INICIALES)
 
-  function addPersona(data: Omit<Persona, "id" | "llamadas">) {
+  async function addPersona(data: PersonaFormData) {
+    await altaPersonaApi({
+      nombre: data.nombre,
+      telefono: data.telefono,
+      horario: data.horario,
+      whatsappFamilia: data.whatsapp,
+      medicacion: data.medicacion.map((m) => `${m.nombre} (${m.horario})`).join("; "),
+      intereses: data.intereses.join(", "),
+    })
+
     const nueva: Persona = {
-      ...data,
       id: `p-${Date.now()}`,
+      nombre: data.nombre,
+      telefono: data.telefono,
+      horario: data.horario,
+      familiar: data.familiar,
+      intereses: data.intereses,
       llamadas: [], // aún sin llamadas: la primera se agenda para mañana
     }
     setPersonas((prev) => [nueva, ...prev])

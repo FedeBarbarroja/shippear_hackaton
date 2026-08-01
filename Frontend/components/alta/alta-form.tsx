@@ -5,15 +5,34 @@ import Link from "next/link"
 import { Check, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PersonaForm, type PersonaFormData } from "@/components/persona-form"
+import { altaPersona } from "@/lib/api"
 
 export function AltaForm() {
   const [enviado, setEnviado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [horario, setHorario] = useState("10:00")
 
-  function handleSubmit(data: PersonaFormData) {
-    setHorario(data.horario)
-    setEnviado(true)
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" })
+  async function handleSubmit(data: PersonaFormData) {
+    setError(null)
+    setEnviando(true)
+    try {
+      await altaPersona({
+        nombre: data.nombre,
+        telefono: data.telefono,
+        horario: data.horario,
+        whatsappFamilia: data.whatsapp,
+        medicacion: data.medicacion.map((m) => `${m.nombre} (${m.horario})`).join("; "),
+        intereses: data.intereses.join(", "),
+      })
+      setHorario(data.horario)
+      setEnviado(true)
+      if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo dar de alta. Probá de nuevo.")
+    } finally {
+      setEnviando(false)
+    }
   }
 
   if (enviado) {
@@ -40,5 +59,15 @@ export function AltaForm() {
     )
   }
 
-  return <PersonaForm onSubmit={handleSubmit} />
+  return (
+    <div>
+      {error && (
+        <p className="mx-auto mb-4 max-w-2xl text-center text-sm text-emergency">{error}</p>
+      )}
+      <PersonaForm
+        onSubmit={handleSubmit}
+        submitLabel={enviando ? "Dando de alta…" : "Dar de alta y agendar la primera llamada"}
+      />
+    </div>
+  )
 }
