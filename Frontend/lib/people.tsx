@@ -32,12 +32,6 @@ function llamada(
   return { id, fecha, hora, estado, resumen, duracion, atendio, detalles: {} }
 }
 
-// Numero propio para probar la demo: las personas de ejemplo tienen telefonos
-// ficticios, asi que sin esto el boton "Probar llamada" queda deshabilitado.
-// Se define en Frontend/.env.local (que no se commitea) para no dejar un
-// numero personal en el repo.
-const TEL_DEMO = process.env.NEXT_PUBLIC_TEST_PHONE
-
 // Personas de ejemplo para la demo del hackathon.
 const PERSONAS_INICIALES: Persona[] = [
   {
@@ -90,11 +84,7 @@ type PeopleContextValue = {
 const PeopleContext = createContext<PeopleContextValue | null>(null)
 
 export function PeopleProvider({ children }: { children: ReactNode }) {
-  const [personas, setPersonas] = useState<Persona[]>(() =>
-    TEL_DEMO
-      ? PERSONAS_INICIALES.map((p) => ({ ...p, telefono: TEL_DEMO, whatsappFamilia: TEL_DEMO }))
-      : PERSONAS_INICIALES,
-  )
+  const [personas, setPersonas] = useState<Persona[]>(PERSONAS_INICIALES)
 
   async function addPersona(data: PersonaFormData) {
     const medicacion = data.medicacion.map((m) => `${m.nombre} (${m.horario})`).join("; ")

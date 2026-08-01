@@ -32,15 +32,18 @@ function PersonaCard({ persona }: { persona: Persona }) {
   const [prueba, setPrueba] = useState<"idle" | "llamando" | "ok" | "error">("idle")
   const [error, setError] = useState<string | null>(null)
 
+  // Las personas de ejemplo no tienen WhatsApp de la familia cargado: el parte
+  // va al mismo numero al que se llama.
+  const whatsappParte = persona.whatsappFamilia ?? persona.telefono
+
   async function probarLlamada() {
-    if (!persona.whatsappFamilia) return
     setPrueba("llamando")
     setError(null)
     try {
       await dispararLlamada({
         nombre: persona.nombre,
         telefono: persona.telefono,
-        whatsappFamilia: persona.whatsappFamilia,
+        whatsappFamilia: whatsappParte,
         medicacion: persona.medicacion,
       })
       setPrueba("ok")
@@ -135,13 +138,9 @@ function PersonaCard({ persona }: { persona: Persona }) {
           variant="outline"
           size="sm"
           className="w-full justify-center"
-          disabled={!persona.whatsappFamilia || prueba === "llamando"}
+          disabled={prueba === "llamando"}
           onClick={probarLlamada}
-          title={
-            persona.whatsappFamilia
-              ? `Llama a ${persona.telefono} y manda el parte a ${persona.whatsappFamilia}`
-              : "Persona de ejemplo: no tiene WhatsApp real cargado"
-          }
+          title={`Llama a ${persona.telefono} y manda el parte a ${whatsappParte}`}
         >
           <PhoneCall className="h-4 w-4" aria-hidden="true" />
           {prueba === "llamando" ? "Llamando…" : prueba === "ok" ? "Llamada en curso" : "Probar llamada"}
