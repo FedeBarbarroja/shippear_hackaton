@@ -87,6 +87,8 @@ llamadasRouter.post("/disparar", async (req, res) => {
       {
         phone_number: telefono,
         pathway_id: env.bland.pathwayId,
+        // Explicito: no hereda el idioma de la Persona del pathway.
+        language: "es",
         request_data: { nombre, medicacion, telefono, whatsappFamilia },
         webhook: env.bland.webhookUrl,
         // Sin webhook_events: eso manda eventos *durante* la llamada (una decena
