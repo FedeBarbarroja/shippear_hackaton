@@ -14,6 +14,10 @@ export type Persona = {
   familiar: string
   intereses: string[]
   llamadas: Llamada[]
+  // Solo las personas dadas de alta por la familia los tienen: las de ejemplo
+  // llevan numeros ficticios, asi que no se les puede probar la llamada.
+  whatsappFamilia?: string
+  medicacion?: string
 }
 
 function llamada(
@@ -83,12 +87,14 @@ export function PeopleProvider({ children }: { children: ReactNode }) {
   const [personas, setPersonas] = useState<Persona[]>(PERSONAS_INICIALES)
 
   async function addPersona(data: PersonaFormData) {
+    const medicacion = data.medicacion.map((m) => `${m.nombre} (${m.horario})`).join("; ")
+
     await altaPersonaApi({
       nombre: data.nombre,
       telefono: data.telefono,
       horario: data.horario,
       whatsappFamilia: data.whatsapp,
-      medicacion: data.medicacion.map((m) => `${m.nombre} (${m.horario})`).join("; "),
+      medicacion,
       intereses: data.intereses.join(", "),
     })
 
@@ -100,6 +106,8 @@ export function PeopleProvider({ children }: { children: ReactNode }) {
       familiar: data.familiar,
       intereses: data.intereses,
       llamadas: [], // aún sin llamadas: la primera se agenda para mañana
+      whatsappFamilia: data.whatsapp,
+      medicacion,
     }
     setPersonas((prev) => [nueva, ...prev])
     return nueva

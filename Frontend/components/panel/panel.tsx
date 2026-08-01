@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Phone, Clock, UserPlus, MessageCircle, CalendarClock, ArrowRight, PhoneOff } from "lucide-react"
+import { Phone, Clock, UserPlus, MessageCircle, CalendarClock, ArrowRight, PhoneOff, PhoneCall } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ESTADOS } from "@/lib/buendia"
+import { dispararLlamada } from "@/lib/api"
 import { usePeople, type Persona } from "@/lib/people"
 import { useAuth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,26 @@ function PersonaCard({ persona }: { persona: Persona }) {
   const eUltima = ultima ? ESTADOS[ultima.estado] : null
   const semaforo = persona.llamadas.slice(0, 7).reverse()
   const recientes = persona.llamadas.slice(0, 3)
+  const [prueba, setPrueba] = useState<"idle" | "llamando" | "ok" | "error">("idle")
+  const [error, setError] = useState<string | null>(null)
+
+  async function probarLlamada() {
+    if (!persona.whatsappFamilia) return
+    setPrueba("llamando")
+    setError(null)
+    try {
+      await dispararLlamada({
+        nombre: persona.nombre,
+        telefono: persona.telefono,
+        whatsappFamilia: persona.whatsappFamilia,
+        medicacion: persona.medicacion,
+      })
+      setPrueba("ok")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo llamar")
+      setPrueba("error")
+    }
+  }
 
   return (
     <article className={cn("flex flex-col rounded-3xl border border-border bg-card p-6 ring-1", eUltima ? eUltima.ringClass : "ring-transparent")}>
@@ -109,7 +130,33 @@ function PersonaCard({ persona }: { persona: Persona }) {
         </div>
       )}
 
-      <div className="mt-5 border-t border-border pt-4">
+      <div className="mt-5 space-y-2 border-t border-border pt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full justify-center"
+          disabled={!persona.whatsappFamilia || prueba === "llamando"}
+          onClick={probarLlamada}
+          title={
+            persona.whatsappFamilia
+              ? `Llama a ${persona.telefono} y manda el parte a ${persona.whatsappFamilia}`
+              : "Persona de ejemplo: no tiene WhatsApp real cargado"
+          }
+        >
+          <PhoneCall className="h-4 w-4" aria-hidden="true" />
+          {prueba === "llamando" ? "Llamando…" : prueba === "ok" ? "Llamada en curso" : "Probar llamada"}
+        </Button>
+        {error && (
+          <p role="alert" className="text-xs text-destructive">
+            {error}
+          </p>
+        )}
+        {prueba === "ok" && (
+          <p className="text-xs text-muted-foreground">
+            Suena en unos segundos. El parte llega al WhatsApp cuando corte.
+          </p>
+        )}
+
         <Button
           render={<Link href="/dashboard" />}
           nativeButton={false}
