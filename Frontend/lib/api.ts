@@ -18,7 +18,11 @@ async function post(path: string, payload: unknown, errorMsg: string) {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.error ?? `${errorMsg} (${res.status})`)
+    // El backend reenvia el error del proveedor tal cual, que a veces es un
+    // objeto: sin esto el usuario ve "[object Object]".
+    const detalle =
+      typeof body.error === "string" ? body.error : body.error ? JSON.stringify(body.error) : null
+    throw new Error(detalle ? `${errorMsg}: ${detalle}` : `${errorMsg} (${res.status})`)
   }
 
   return res.json()

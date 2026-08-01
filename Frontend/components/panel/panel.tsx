@@ -2,7 +2,18 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Phone, Clock, UserPlus, MessageCircle, CalendarClock, ArrowRight, PhoneOff, PhoneCall } from "lucide-react"
+import {
+  Phone,
+  Clock,
+  UserPlus,
+  MessageCircle,
+  CalendarClock,
+  ArrowRight,
+  PhoneOff,
+  PhoneCall,
+  Loader2,
+  AlertCircle,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ESTADOS } from "@/lib/buendia"
 import { dispararLlamada } from "@/lib/api"
@@ -35,6 +46,7 @@ function PersonaCard({ persona }: { persona: Persona }) {
   // Las personas de ejemplo no tienen WhatsApp de la familia cargado: el parte
   // va al mismo numero al que se llama.
   const whatsappParte = persona.whatsappFamilia ?? persona.telefono
+  const llamando = prueba === "llamando"
 
   async function probarLlamada() {
     setPrueba("llamando")
@@ -135,26 +147,47 @@ function PersonaCard({ persona }: { persona: Persona }) {
 
       <div className="mt-5 space-y-2 border-t border-border pt-4">
         <Button
-          variant="outline"
+          variant={prueba === "error" ? "destructive" : "outline"}
           size="sm"
           className="w-full justify-center"
-          disabled={prueba === "llamando"}
+          disabled={llamando}
           onClick={probarLlamada}
           title={`Llama a ${persona.telefono} y manda el parte a ${whatsappParte}`}
         >
-          <PhoneCall className="h-4 w-4" aria-hidden="true" />
-          {prueba === "llamando" ? "Llamando…" : prueba === "ok" ? "Llamada en curso" : "Probar llamada"}
+          {llamando ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <PhoneCall className={cn("h-4 w-4", prueba === "ok" && "animate-pulse text-ok")} aria-hidden="true" />
+          )}
+          {llamando ? "Llamando…" : prueba === "ok" ? "Llamada en curso" : prueba === "error" ? "Reintentar" : "Probar llamada"}
         </Button>
-        {error && (
-          <p role="alert" className="text-xs text-destructive">
-            {error}
-          </p>
-        )}
-        {prueba === "ok" && (
-          <p className="text-xs text-muted-foreground">
-            Suena en unos segundos. El parte llega al WhatsApp cuando corte.
-          </p>
-        )}
+
+        {/* aria-live: el resultado llega despues del click, hay que anunciarlo */}
+        <div aria-live="polite">
+          {llamando && (
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="relative flex h-2 w-2" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+              Conectando con {persona.telefono}…
+            </p>
+          )}
+          {prueba === "ok" && (
+            <p className="text-xs text-muted-foreground">
+              Suena en unos segundos. El parte llega a {whatsappParte} cuando corte.
+            </p>
+          )}
+          {prueba === "error" && error && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+            >
+              <AlertCircle className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span className="min-w-0 break-words">{error}</span>
+            </div>
+          )}
+        </div>
 
         <Button
           render={<Link href="/dashboard" />}
