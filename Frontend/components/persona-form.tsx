@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Plus, X, ArrowRight, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { PhoneInput } from "@/components/ui/phone-input"
+import { PhoneInput, leerTelefonoCompleto } from "@/components/ui/phone-input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -91,9 +91,9 @@ export function PersonaForm({
     const form = e.currentTarget
     const data: PersonaFormData = {
       nombre: (form.elements.namedItem("nombre") as HTMLInputElement).value.trim(),
-      telefono: (form.elements.namedItem("telefono") as HTMLInputElement).value.trim(),
+      telefono: leerTelefonoCompleto(form, "telefono"),
       familiar: (form.elements.namedItem("familiar") as HTMLInputElement).value.trim(),
-      whatsapp: (form.elements.namedItem("whatsapp") as HTMLInputElement).value.trim(),
+      whatsapp: leerTelefonoCompleto(form, "whatsapp"),
       notas: (form.elements.namedItem("notas") as HTMLTextAreaElement).value.trim(),
       horario,
       intereses,
@@ -130,7 +130,7 @@ export function PersonaForm({
 
           <div className="space-y-2">
             <Label htmlFor="horario">Horario preferido de llamada</Label>
-            <Select value={horario} onValueChange={setHorario}>
+            <Select value={horario} onValueChange={(v) => v && setHorario(v)}>
               <SelectTrigger id="horario" className="w-full">
                 <SelectValue placeholder="Elegí un horario" />
               </SelectTrigger>

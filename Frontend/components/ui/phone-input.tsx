@@ -15,6 +15,10 @@ const PAISES = [
   { code: "US", dial: "+1", flag: "🇺🇸", label: "Estados Unidos (+1)" },
 ]
 
+// name: nombre del input visible (el que autocompleta el navegador).
+// El codigo de pais viaja en un input oculto "{name}-dial". El submit
+// del formulario combina ambos leyendo el DOM directo, no el estado de
+// React, para no perder el autocompletado del navegador.
 export function PhoneInput({
   id,
   name,
@@ -29,11 +33,7 @@ export function PhoneInput({
   defaultValue?: string
 }) {
   const [pais, setPais] = useState(PAISES[0].code)
-  const [numero, setNumero] = useState(defaultValue?.replace(/^\+\d+/, "").trim() ?? "")
-
   const dial = PAISES.find((p) => p.code === pais)?.dial ?? ""
-  const digitos = numero.replace(/\D/g, "")
-  const valor = digitos ? `${dial}${digitos}` : ""
 
   return (
     <div className="flex gap-2">
@@ -49,16 +49,25 @@ export function PhoneInput({
           ))}
         </SelectContent>
       </Select>
+      <input type="hidden" name={`${name}-dial`} value={dial} />
       <Input
         id={id}
+        name={name}
+        autoComplete="tel-national"
         type="tel"
         required={required}
         placeholder={placeholder}
-        value={numero}
-        onChange={(e) => setNumero(e.target.value)}
+        defaultValue={defaultValue?.replace(/^\+\d+/, "").trim()}
         className="flex-1"
       />
-      <input type="hidden" name={name} value={valor} />
     </div>
   )
+}
+
+// Combina el numero tipeado/autocompletado con el codigo de pais elegido,
+// leyendo ambos directo del DOM del formulario (no de estado de React).
+export function leerTelefonoCompleto(form: HTMLFormElement, campo: string) {
+  const digitos = (form.elements.namedItem(campo) as HTMLInputElement | null)?.value.replace(/\D/g, "") ?? ""
+  const dial = (form.elements.namedItem(`${campo}-dial`) as HTMLInputElement | null)?.value ?? ""
+  return digitos ? `${dial}${digitos}` : ""
 }
