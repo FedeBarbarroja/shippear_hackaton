@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Plus, X, ArrowRight, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -123,7 +124,7 @@ export function PersonaForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="telefono">Teléfono al que llamamos</Label>
-              <Input id="telefono" name="telefono" type="tel" required placeholder="+54 341 555 0142" />
+              <PhoneInput id="telefono" name="telefono" required placeholder="341 555 0142" />
             </div>
           </div>
 
@@ -161,7 +162,7 @@ export function PersonaForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="whatsapp">WhatsApp donde llega el parte</Label>
-              <Input id="whatsapp" name="whatsapp" type="tel" required placeholder="+54 341 555 0199" />
+              <PhoneInput id="whatsapp" name="whatsapp" required placeholder="341 555 0199" />
             </div>
           </div>
         </fieldset>
