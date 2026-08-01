@@ -89,7 +89,8 @@ llamadasRouter.post("/disparar", async (req, res) => {
         pathway_id: env.bland.pathwayId,
         request_data: { nombre, medicacion, telefono, whatsappFamilia },
         webhook: env.bland.webhookUrl,
-        webhook_events: ["call"],
+        // Sin webhook_events: eso manda eventos *durante* la llamada (una decena
+        // por llamada, sin transcripcion). Solo queremos el webhook post-llamada.
       },
       { headers: { Authorization: env.bland.apiKey } }
     );
@@ -112,10 +113,13 @@ llamadasRouter.post("/webhook", async (req, res) => {
   try {
     const body = req.body;
     const transcripcion = body.concatenated_transcript ?? body.transcript ?? "";
-    const { nombre, medicacion, telefono, whatsappFamilia, intereses } = body.request_data ?? {};
+    // Bland no devuelve request_data como campo top-level: lo mezcla dentro de
+    // "variables" junto con sus propias variables (timestamps, telefonos, etc).
+    const datos = { ...body.variables, ...body.request_data };
+    const { nombre, medicacion, telefono, whatsappFamilia, intereses } = datos;
 
     if (!whatsappFamilia) {
-      console.error("webhook de Bland sin whatsappFamilia en request_data", body.request_data);
+      console.error("webhook de Bland sin whatsappFamilia. keys:", Object.keys(body), Object.keys(datos));
       return;
     }
 
