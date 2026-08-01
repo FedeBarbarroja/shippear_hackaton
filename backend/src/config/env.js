@@ -6,6 +6,11 @@ export const env = {
     apiKey: process.env.GROQ_API_KEY,
     model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
   },
+  bland: {
+    apiKey: process.env.BLAND_API_KEY,
+    pathwayId: process.env.BLAND_PATHWAY_ID,
+    webhookUrl: process.env.BLAND_WEBHOOK_URL,
+  },
   evolution: {
     url: process.env.EVOLUTION_API_URL,
     apiKey: process.env.EVOLUTION_API_KEY,

@@ -1,8 +1,10 @@
 import { Router } from "express";
+import axios from "axios";
 import { analizarTranscripcion } from "../services/llm.js";
 import { armarMensaje, enviarWhatsapp } from "../services/whatsapp.js";
 import { guardarHistorial } from "../services/sheets.js";
 import { getPersona } from "../store/personas.js";
+import { env } from "../config/env.js";
 
 export const llamadasRouter = Router();
 
@@ -64,6 +66,35 @@ llamadasRouter.post("/test", async (req, res) => {
     const transcripcion = req.body?.transcripcion ?? TRANSCRIPCION_FALSA;
     const { analisis, mensaje } = await procesarLlamada({ persona, transcripcion });
     res.json({ ok: true, analisis, mensaje });
+  } catch (err) {
+    console.error(err.response?.data ?? err.message);
+    res.status(500).json({ error: err.response?.data ?? err.message });
+  }
+});
+
+// Fase 2: dispara la llamada real via Bland AI. Lo llama el frontend cuando
+// la familia (o la demo) quiere iniciar la llamada a la persona mayor.
+llamadasRouter.post("/disparar", async (req, res) => {
+  try {
+    const { nombre, medicacion, telefono, whatsappFamilia } = req.body;
+
+    if (!nombre || !telefono || !whatsappFamilia) {
+      return res.status(400).json({ error: "faltan campos: nombre, telefono, whatsappFamilia" });
+    }
+
+    const { data } = await axios.post(
+      "https://api.bland.ai/v1/calls",
+      {
+        phone_number: telefono,
+        pathway_id: env.bland.pathwayId,
+        request_data: { nombre, medicacion, telefono, whatsappFamilia },
+        webhook: env.bland.webhookUrl,
+        webhook_events: ["call"],
+      },
+      { headers: { Authorization: env.bland.apiKey } }
+    );
+
+    res.json(data);
   } catch (err) {
     console.error(err.response?.data ?? err.message);
     res.status(500).json({ error: err.response?.data ?? err.message });
