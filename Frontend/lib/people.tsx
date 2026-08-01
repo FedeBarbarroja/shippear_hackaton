@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react"
-import { HISTORIAL, type EstadoKey, type Llamada } from "@/lib/buendia"
+import { HISTORIAL, type Llamada } from "@/lib/buendia"
 import { altaPersona as altaPersonaApi } from "@/lib/api"
 import type { PersonaFormData } from "@/components/persona-form"
 
@@ -14,65 +14,23 @@ export type Persona = {
   familiar: string
   intereses: string[]
   llamadas: Llamada[]
-  // Solo las personas dadas de alta por la familia los tienen: las de ejemplo
-  // llevan numeros ficticios, asi que no se les puede probar la llamada.
   whatsappFamilia?: string
   medicacion?: string
 }
 
-function llamada(
-  id: string,
-  fecha: string,
-  hora: string,
-  estado: EstadoKey,
-  resumen: string,
-  duracion: string,
-  atendio = true,
-): Llamada {
-  return { id, fecha, hora, estado, resumen, duracion, atendio, detalles: {} }
-}
-
-// Personas de ejemplo para la demo del hackathon.
+// Unica persona de la demo, con numero real para poder probar el circuito.
 const PERSONAS_INICIALES: Persona[] = [
   {
     id: "rosa",
     nombre: "Rosa Giménez",
     edad: 82,
-    telefono: "+54 341 555 0142",
+    telefono: "+5493413159680",
+    whatsappFamilia: "+5493413159680",
+    medicacion: "presión, 1 comprimido después del desayuno",
     horario: "10:00",
     familiar: "Lucía (nieta)",
     intereses: ["Los nietos", "El jardín", "Central"],
     llamadas: HISTORIAL,
-  },
-  {
-    id: "hector",
-    nombre: "Héctor Duarte",
-    edad: 78,
-    telefono: "+54 351 555 0188",
-    horario: "09:00",
-    familiar: "Marcos (hijo)",
-    intereses: ["El ajedrez", "Tango", "Sus perros"],
-    llamadas: [
-      llamada("h4", "2026-08-01", "09:01", "ok", "Todo bien. Salió a caminar con los perros temprano.", "3:22"),
-      llamada("h3", "2026-07-31", "09:00", "ok", "De buen humor. Ganó una partida de ajedrez online.", "2:58"),
-      llamada("h2", "2026-07-30", "09:03", "ok", "Día tranquilo, tomó toda la medicación.", "3:10"),
-      llamada("h1", "2026-07-29", "09:00", "ok", "Sin novedades. Charló de tango.", "2:41"),
-    ],
-  },
-  {
-    id: "elba",
-    nombre: "Elba Sosa",
-    edad: 85,
-    telefono: "+54 341 555 0210",
-    horario: "11:00",
-    familiar: "Paula (hija)",
-    intereses: ["Tejido", "Las novelas", "La iglesia"],
-    llamadas: [
-      llamada("e4", "2026-08-01", "11:02", "alerta", "Suena cansada y no almorzó todavía.", "2:15"),
-      llamada("e3", "2026-07-31", "11:00", "ok", "Bien. Terminó una bufanda que estaba tejiendo.", "3:05"),
-      llamada("e2", "2026-07-30", "—", "alerta", "No atendió en dos intentos.", "—", false),
-      llamada("e1", "2026-07-29", "11:01", "ok", "Contenta, la visitó una amiga.", "3:30"),
-    ],
   },
 ]
 
