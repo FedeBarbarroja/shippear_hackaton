@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -30,17 +30,14 @@ export function PhoneInput({
 }) {
   const [pais, setPais] = useState(PAISES[0].code)
   const [numero, setNumero] = useState(defaultValue?.replace(/^\+\d+/, "").trim() ?? "")
-  const [valor, setValor] = useState("")
 
-  useEffect(() => {
-    const dial = PAISES.find((p) => p.code === pais)?.dial ?? ""
-    const digitos = numero.replace(/\D/g, "")
-    setValor(digitos ? `${dial}${digitos}` : "")
-  }, [pais, numero])
+  const dial = PAISES.find((p) => p.code === pais)?.dial ?? ""
+  const digitos = numero.replace(/\D/g, "")
+  const valor = digitos ? `${dial}${digitos}` : ""
 
   return (
     <div className="flex gap-2">
-      <Select value={pais} onValueChange={setPais}>
+      <Select value={pais} onValueChange={(v) => v && setPais(v)}>
         <SelectTrigger className="w-[92px] shrink-0" aria-label="Código de país">
           <SelectValue>{PAISES.find((p) => p.code === pais)?.flag}</SelectValue>
         </SelectTrigger>
